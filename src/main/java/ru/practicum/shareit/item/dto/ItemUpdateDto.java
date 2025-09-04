@@ -1,4 +1,4 @@
-package ru.practicum.shareit.item.model;
+package ru.practicum.shareit.item.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,7 +13,7 @@ import ru.practicum.shareit.request.ItemRequest;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Item {
+public class ItemUpdateDto {
     private Long id;
     private String name;
     private String description;
