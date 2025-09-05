@@ -26,25 +26,18 @@ public class InMemoryUserRepositoryImpl implements UserRepository {
     }
 
     public User create(User newUser) {
-        Optional<User> userWithExistEmail = users.values()
-                .stream()
-                .filter(u -> u.getEmail().equals(newUser.getEmail()))
-                .findFirst();
-        if (userWithExistEmail.isPresent()) {
-            throw new ValidationException(String.format("Пользователь с email %s уже зарегистрирован", newUser.getEmail()));
-        } else {
+        if (getUserIdWithEmail(newUser.getEmail()).isEmpty()) {
             addId(newUser);
             users.put(newUser.getId(), newUser);
+        } else {
+            throw new ValidationException(String.format("Пользователь с email %s уже зарегистрирован",
+                    newUser.getEmail()));
         }
         return newUser;
     }
 
     public Optional<User> getUserById(Long userId) {
-        if (users.containsKey(userId)) {
-            return Optional.of(users.get(userId));
-        } else {
-            return Optional.empty();
-        }
+        return Optional.ofNullable(users.get(userId));
     }
 
     public User update(User user) {

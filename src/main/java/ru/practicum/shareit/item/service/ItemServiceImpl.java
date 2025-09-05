@@ -31,7 +31,7 @@ public class ItemServiceImpl implements ItemService {
 
     public Collection<Item> getItemsFromUser(Long ownerId) {
         userRepository.getUserById(ownerId)
-                .orElseThrow(() -> new NoSuchElementException("Пользователь с id " + ownerId + " не найден"));
+                .orElseThrow(() -> new NoSuchElementException(String.format("Пользователь с id %s не найден", ownerId)));
         return itemRepository.getItemsFromUser(ownerId);
     }
 
@@ -43,7 +43,7 @@ public class ItemServiceImpl implements ItemService {
     public Item create(ItemCreateDto itemCreateDto) {
         Long ownerId = itemCreateDto.getOwner();
         userRepository.getUserById(ownerId)
-                .orElseThrow(() -> new NoSuchElementException("Пользователь с id " + ownerId + " не найден"));
+                .orElseThrow(() -> new NoSuchElementException(String.format("Пользователь с id %s не найден", ownerId)));
         return itemRepository.create(ItemMapper.createItemToItem(itemCreateDto));
     }
 
@@ -51,7 +51,7 @@ public class ItemServiceImpl implements ItemService {
         final Item existItem = getItemById(itemUpdateDto.getId());
         Long ownerId = itemUpdateDto.getOwner();
         userRepository.getUserById(ownerId)
-                .orElseThrow(() -> new NoSuchElementException("Пользователь с id " + ownerId + " не найден"));
+                .orElseThrow(() -> new NoSuchElementException(String.format("Пользователь с id %s не найден",ownerId)));
 
         if (!Objects.equals(itemUpdateDto.getOwner(), existItem.getOwner())) {
             throw new AccessViolationException("Доступ ограничен!");
