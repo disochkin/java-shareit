@@ -26,13 +26,12 @@ public class InMemoryUserRepositoryImpl implements UserRepository {
     }
 
     public User create(User newUser) {
-        if (getUserIdWithEmail(newUser.getEmail()).isEmpty()) {
-            addId(newUser);
-            users.put(newUser.getId(), newUser);
-        } else {
+        if (getUserIdWithEmail(newUser.getEmail()).isPresent()) {
             throw new ValidationException(String.format("Пользователь с email %s уже зарегистрирован",
                     newUser.getEmail()));
         }
+        addId(newUser);
+        users.put(newUser.getId(), newUser);
         return newUser;
     }
 

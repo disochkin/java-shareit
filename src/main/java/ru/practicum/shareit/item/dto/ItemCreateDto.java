@@ -6,11 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.practicum.shareit.request.ItemRequest;
 
-/**
- * TODO Sprint add-controllers.
- */
 @Getter
 @Setter
 @AllArgsConstructor
@@ -24,5 +20,4 @@ public class ItemCreateDto {
     @NotNull(message = "Поле available не должно быть пустым")
     private Boolean available;
     private Long owner;
-    private ItemRequest itemRequest;
 }
