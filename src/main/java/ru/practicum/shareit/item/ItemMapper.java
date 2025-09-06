@@ -1,41 +1,30 @@
 package ru.practicum.shareit.item;
 
+import lombok.experimental.UtilityClass;
 import ru.practicum.shareit.item.dto.ItemCreateDto;
+import ru.practicum.shareit.item.dto.ItemFrontDto;
 import ru.practicum.shareit.item.dto.ItemUpdateDto;
 import ru.practicum.shareit.item.model.Item;
 
+@UtilityClass
 public class ItemMapper {
-
-    public static ItemCreateDto toItemDto(Item item) {
-        return new ItemCreateDto(
+    public static ItemFrontDto itemToFrontItemDto(Item item) {
+        return new ItemFrontDto(
                 item.getId(),
                 item.getName(),
                 item.getDescription(),
-                item.getAvailable(),
-                item.getOwner(),
-                item.getItemRequest() != null ? item.getItemRequest() : null
+                item.getAvailable()
         );
     }
 
-    public static Item updateItemToItem(ItemUpdateDto itemUpdateDto) {
-        return new Item(
-                itemUpdateDto.getId() != null ? itemUpdateDto.getId() : null,
-                itemUpdateDto.getName(),
-                itemUpdateDto.getDescription(),
-                itemUpdateDto.getAvailable(),
-                itemUpdateDto.getOwner(),
-                itemUpdateDto.getItemRequest() != null ? itemUpdateDto.getItemRequest() : null
-        );
-    }
-
-    public static Item createItemToItem(ItemCreateDto itemCreateDto) {
+    public static Item createItemDtoToItem(ItemCreateDto itemCreateDto) {
         return new Item(
                 null,
                 itemCreateDto.getName(),
                 itemCreateDto.getDescription(),
                 itemCreateDto.getAvailable(),
                 itemCreateDto.getOwner(),
-                itemCreateDto.getItemRequest() != null ? itemCreateDto.getItemRequest() : null
+                null
         );
     }
 }
