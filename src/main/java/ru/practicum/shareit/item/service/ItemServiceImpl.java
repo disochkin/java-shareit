@@ -12,7 +12,10 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepositoryImpl;
 import ru.practicum.shareit.user.repository.UserRepository;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
@@ -24,12 +27,12 @@ public class ItemServiceImpl implements ItemService {
 
     private Item getItemById(Long itemId) {
         final Optional<Item> itemOptional = itemRepository.getItemById(itemId);
-        return  itemOptional.orElseThrow(() ->
+        return itemOptional.orElseThrow(() ->
                 new NoSuchElementException(String.format("Вещь с id=%s не найдена", itemId)));
     }
 
     public ItemFrontDto getItemFrontDtoById(Long itemId) {
-        return  ItemMapper.itemToFrontItemDto(getItemById(itemId));
+        return ItemMapper.itemToFrontItemDto(getItemById(itemId));
     }
 
     public Collection<ItemFrontDto> getItemsFromUser(Long ownerId) {
@@ -59,7 +62,7 @@ public class ItemServiceImpl implements ItemService {
         final Item updatedItem = getItemById(itemUpdateDto.getId());
         Long ownerId = itemUpdateDto.getOwner();
         userRepository.getUserById(ownerId)
-                .orElseThrow(() -> new NoSuchElementException(String.format("Пользователь с id %s не найден",ownerId)));
+                .orElseThrow(() -> new NoSuchElementException(String.format("Пользователь с id %s не найден", ownerId)));
 
         if (!Objects.equals(itemUpdateDto.getOwner(), updatedItem.getOwner())) {
             throw new AccessViolationException("Доступ ограничен!");
