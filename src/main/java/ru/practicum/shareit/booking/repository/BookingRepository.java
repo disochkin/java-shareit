@@ -58,19 +58,19 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findByBookerIdAndStatusOrderByStartDateDesc(Long bookerId, BookingStatus bookingStatus);
 
     @Query(value = "SELECT id, start_date, end_date, status FROM bookings " +
-            "WHERE start_date > NOW() and item_id=?1 " +
+            "WHERE start_date > NOW() and itemId=?1 " +
             "ORDER BY start_date ASC " +
             "LIMIT 1",
             nativeQuery = true
     )
-    BookingDtoOnlyDate getNextBookingById(Long item_id);
+    BookingDtoOnlyDate getNextBookingById(Long itemId);
 
     @Query(
             value = "SELECT id, start_date, end_date, status FROM bookings " +
-                    "WHERE end_date < NOW() and item_id=?1 " +
+                    "WHERE end_date < NOW() and itemId=?1 " +
                     "ORDER BY end_date DESC " +
                     "LIMIT 1",
             nativeQuery = true
     )
-    BookingDtoOnlyDate getLastBookingById(Long item_id);
+    BookingDtoOnlyDate getLastBookingById(Long itemId);
 }

@@ -11,5 +11,5 @@ public interface BookingDtoOnlyDate {
 
     LocalDateTime getEndDate();
 
-    BookingStatus GetStatus();
+    BookingStatus getStatus();
 }
