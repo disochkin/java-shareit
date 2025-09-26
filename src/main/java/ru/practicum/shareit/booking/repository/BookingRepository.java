@@ -20,6 +20,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "WHERE b.booker.id = :bookerId " +
             "AND b.item.id = :itemId " +
             "AND b.startDate < CURRENT_TIMESTAMP " +
+            "AND b.endDate < CURRENT_TIMESTAMP " +
             "AND b.status = 'APPROVED'"
     )
     List<Booking> checkApprovedBookingExist(Long bookerId, Long itemId);
@@ -58,7 +59,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findByBookerIdAndStatusOrderByStartDateDesc(Long bookerId, BookingStatus bookingStatus);
 
     @Query(value = "SELECT id, start_date, end_date, status FROM bookings " +
-            "WHERE start_date > NOW() and itemId=?1 " +
+            "WHERE start_date > NOW() and item_id=?1 " +
             "ORDER BY start_date ASC " +
             "LIMIT 1",
             nativeQuery = true
@@ -67,7 +68,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     @Query(
             value = "SELECT id, start_date, end_date, status FROM bookings " +
-                    "WHERE end_date < NOW() and itemId=?1 " +
+                    "WHERE end_date < NOW() and item_id=?1 " +
                     "ORDER BY end_date DESC " +
                     "LIMIT 1",
             nativeQuery = true
