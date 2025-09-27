@@ -2,6 +2,7 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.BookingQueryState;
 import ru.practicum.shareit.booking.BookingStatus;
@@ -38,6 +39,7 @@ public class BookingService {
         return BookingMapper.bookingToFrontBookingDto(getBookingById(bookingId));
     }
 
+    @Transactional
     public BookingFrontDto create(Long bookerId, BookingAddRequest bookingAddRequest) {
         if (bookingAddRequest.getStart().isAfter(bookingAddRequest.getEnd())) {
             throw new ValidationException("Время конца бронирования не должно быть меньше времени начала");
@@ -55,6 +57,7 @@ public class BookingService {
         return BookingMapper.bookingToFrontBookingDto(booking);
     }
 
+    @Transactional
     public BookingFrontDto approve(Long approverId, Long bookingId, boolean isApprove) {
         Booking booking = bookingRepository.getItemById(bookingId)
                 .orElseThrow(() -> new NoSuchElementException(String.format("Запрос на бронирование с id=%s не найден", bookingId)));

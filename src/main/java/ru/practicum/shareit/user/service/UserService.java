@@ -2,6 +2,7 @@ package ru.practicum.shareit.user.service;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.UserMapper;
 import ru.practicum.shareit.user.dto.UserAddRequest;
@@ -24,6 +25,7 @@ public class UserService {
                 new NoSuchElementException(String.format("Пользователь с id=%s не найден", userId)));
     }
 
+    @Transactional
     public UserFrontDto create(UserAddRequest userAddRequest) {
         User createdUser = userRepository.save(UserMapper.userCreateDtoToUser(userAddRequest));
         return UserMapper.userToUserFrontDto(createdUser);
@@ -33,6 +35,7 @@ public class UserService {
         return UserMapper.userToUserFrontDto(getUserById(userId));
     }
 
+    @Transactional
     public UserFrontDto update(Long userId, UserUpdateRequest userUpdateRequest) {
         User updatedUser = getUserById(userId);
         final Optional<User> userWithEmailOpt = userRepository.findAllByEmail(userUpdateRequest.getEmail());
@@ -47,6 +50,7 @@ public class UserService {
         return UserMapper.userToUserFrontDto(updatedUser);
     }
 
+    @Transactional
     public void delete(Long userId) {
         final User userToDelete = getUserById(userId);
         userRepository.delete(userToDelete);

@@ -27,15 +27,4 @@ public class Item {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_request", referencedColumnName = "id")
     private ItemRequest itemRequest;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        return id != null && id.equals(((Item) o).getId());
-    }
-
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
-    }
 }

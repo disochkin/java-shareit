@@ -11,8 +11,6 @@ public interface ItemService {
 
     ItemFrontDto getItemFrontDtoById(Long itemId);
 
-    //ItemFrontDtoWithBookingDate getItemFrontDtoWithBookingDate(Long itemId);
-
     Collection<ItemFrontDtoWithBookingDate> getOwnerItemsWithBookingDetails(Long ownerId);
 
     Collection<ItemFrontDto> getItemsFromUser(Long ownerId);

@@ -14,7 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping(path = "/bookings")
 public class BookingController {
-    BookingService bookingService;
+    private final BookingService bookingService;
 
     // Создание запроса на бронирование
     @PostMapping("")
@@ -42,7 +42,7 @@ public class BookingController {
     // Запрос списка запросов на бронирование от пользователя c отбором по состоянию
     @GetMapping("")
     public List<BookingFrontDto> getBookingOfUserByState(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                                         @RequestParam(value = "state", required = false,
+                                                         @RequestParam(value = "state",
                                                                  defaultValue = "ALL") BookingQueryState bookingQueryState) {
         return bookingService.getBookingOfUserByState(userId, bookingQueryState);
     }
@@ -50,7 +50,7 @@ public class BookingController {
     // Запрос списка запросов на бронирование владельцу
     @GetMapping("/owner")
     public List<BookingFrontDto> getBookingOfOwnerByState(@RequestHeader("X-Sharer-User-Id") Long ownerId,
-                                                          @RequestParam(value = "state", required = false,
+                                                          @RequestParam(value = "state",
                                                                   defaultValue = "ALL") BookingQueryState bookingQueryState) {
         return bookingService.getBookingOfOwnerByState(ownerId, bookingQueryState);
     }

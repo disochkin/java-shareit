@@ -3,6 +3,7 @@ package ru.practicum.shareit.item.service;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDtoOnlyDate;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
@@ -78,6 +79,7 @@ public class ItemServiceImpl implements ItemService {
                 .toList();
     }
 
+    @Transactional
     public ItemFrontDto create(Long ownerId, ItemAddRequest itemAddRequest) {
         User owner = userRepository.getUserById(ownerId)
                 .orElseThrow(() -> new NoSuchElementException(String.format("Пользователь с id %s не найден", ownerId)));
@@ -85,6 +87,7 @@ public class ItemServiceImpl implements ItemService {
         return ItemMapper.itemToFrontItemDto(null, createdItem);
     }
 
+    @Transactional
     public ItemFrontDto update(Long ownerId, ItemUpdateRequest itemUpdateRequest) {
         final Item updatedItem = getItemById(itemUpdateRequest.getId());
         userRepository.getUserById(ownerId)
@@ -101,6 +104,7 @@ public class ItemServiceImpl implements ItemService {
 
     }
 
+    @Transactional
     public CommentCreatedDto createComment(Long authorId, Long itemId, CommentAddRequest commentAddRequest) {
         User author = userRepository.getUserById(authorId)
                 .orElseThrow(() -> new NoSuchElementException(String.format("Пользователь с id %s не найден", authorId)));
