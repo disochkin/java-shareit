@@ -10,11 +10,10 @@ import ru.practicum.shareit.request.ItemRequest;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ItemUpdateDto {
+public class ItemUpdateRequest {
     private Long id;
     private String name;
     private String description;
     private Boolean available;
-    private Long owner;
     private ItemRequest itemRequest;
 }

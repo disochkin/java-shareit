@@ -11,13 +11,11 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ItemCreateDto {
-    private Long id;
+public class ItemAddRequest {
     @NotBlank(message = "Поле name не должно быть пустым")
     private String name;
     @NotBlank(message = "Поле description не должно быть пустым")
     private String description;
     @NotNull(message = "Поле available не должно быть пустым")
     private Boolean available;
-    private Long owner;
 }

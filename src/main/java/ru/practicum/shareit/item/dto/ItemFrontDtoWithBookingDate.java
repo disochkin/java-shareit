@@ -12,12 +12,12 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ItemFrontDto {
+public class ItemFrontDtoWithBookingDate {
     private Long id;
     private String name;
     private String description;
     private boolean available;
     private BookingDtoOnlyDate lastBooking;
     private BookingDtoOnlyDate nextBooking;
-    private List<CommentNestedDto> comments;
+    private List<CommentNestedDto> comment;
 }

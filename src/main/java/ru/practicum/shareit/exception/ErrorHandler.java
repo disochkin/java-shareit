@@ -58,5 +58,4 @@ public class ErrorHandler {
         log.error(ex.getMessage());
         return new ResponseEntity<>(Map.of("error", ex.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
-
 }

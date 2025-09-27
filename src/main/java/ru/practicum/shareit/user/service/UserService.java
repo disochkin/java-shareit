@@ -2,11 +2,12 @@ package ru.practicum.shareit.user.service;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.UserMapper;
-import ru.practicum.shareit.user.dto.UserCreateDto;
+import ru.practicum.shareit.user.dto.UserAddRequest;
 import ru.practicum.shareit.user.dto.UserFrontDto;
-import ru.practicum.shareit.user.dto.UserUpdateDto;
+import ru.practicum.shareit.user.dto.UserUpdateRequest;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -24,8 +25,9 @@ public class UserService {
                 new NoSuchElementException(String.format("Пользователь с id=%s не найден", userId)));
     }
 
-    public UserFrontDto create(UserCreateDto userCreateDto) {
-        User createdUser = userRepository.create(UserMapper.userCreateDtoToUser(userCreateDto));
+    @Transactional
+    public UserFrontDto create(UserAddRequest userAddRequest) {
+        User createdUser = userRepository.save(UserMapper.userCreateDtoToUser(userAddRequest));
         return UserMapper.userToUserFrontDto(createdUser);
     }
 
@@ -33,19 +35,22 @@ public class UserService {
         return UserMapper.userToUserFrontDto(getUserById(userId));
     }
 
-    public UserFrontDto update(UserUpdateDto userUpdateDto) {
-        final User updatedUser = getUserById(userUpdateDto.getId());
-        final Optional<Long> userIdWithEmailOpt = userRepository.getUserIdWithEmail(userUpdateDto.getEmail());
-        userIdWithEmailOpt
-                .filter(id -> !id.equals(userUpdateDto.getId()))
+    @Transactional
+    public UserFrontDto update(Long userId, UserUpdateRequest userUpdateRequest) {
+        User updatedUser = getUserById(userId);
+        final Optional<User> userWithEmailOpt = userRepository.findAllByEmail(userUpdateRequest.getEmail());
+        userWithEmailOpt
+                .filter(user -> !user.getId().equals(updatedUser.getId()))
                 .ifPresent(id -> {
-                    throw new ValidationException(String.format("Пользователь с email=%s уже существует", userUpdateDto.getEmail()));
+                    throw new ValidationException(String.format("Пользователь с email=%s уже существует", userUpdateRequest.getEmail()));
                 });
-        Optional.ofNullable(userUpdateDto.getName()).ifPresent(updatedUser::setName);
-        Optional.ofNullable(userUpdateDto.getEmail()).ifPresent(updatedUser::setEmail);
-        return UserMapper.userToUserFrontDto(userRepository.update(updatedUser));
+        Optional.ofNullable(userUpdateRequest.getName()).ifPresent(updatedUser::setName);
+        Optional.ofNullable(userUpdateRequest.getEmail()).ifPresent(updatedUser::setEmail);
+        userRepository.save(updatedUser);
+        return UserMapper.userToUserFrontDto(updatedUser);
     }
 
+    @Transactional
     public void delete(Long userId) {
         final User userToDelete = getUserById(userId);
         userRepository.delete(userToDelete);
