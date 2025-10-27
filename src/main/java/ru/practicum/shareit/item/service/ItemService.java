@@ -1,19 +1,22 @@
 package ru.practicum.shareit.item.service;
 
-import ru.practicum.shareit.item.dto.ItemCreateDto;
-import ru.practicum.shareit.item.dto.ItemFrontDto;
-import ru.practicum.shareit.item.dto.ItemUpdateDto;
+import ru.practicum.shareit.item.dto.*;
 
 import java.util.Collection;
 
 public interface ItemService {
-    ItemFrontDto create(ItemCreateDto newItem);
+    ItemFrontDto create(Long ownerId, ItemAddRequest newItem);
 
-    ItemFrontDto update(ItemUpdateDto itemUpdateDto);
+    ItemFrontDto update(Long ownerId, ItemUpdateRequest itemUpdateRequest);
 
     ItemFrontDto getItemFrontDtoById(Long itemId);
+
+    Collection<ItemFrontDtoWithBookingDate> getOwnerItemsWithBookingDetails(Long ownerId);
 
     Collection<ItemFrontDto> getItemsFromUser(Long ownerId);
 
     Collection<ItemFrontDto> itemSearchByNameOrDescription(String text);
+
+    CommentCreatedDto createComment(Long authorId, Long itemId, CommentAddRequest commentAddRequest);
+
 }

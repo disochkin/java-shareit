@@ -1,19 +1,21 @@
 package ru.practicum.shareit.item.repository;
 
-import ru.practicum.shareit.item.dto.ItemCreateDto;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.Collection;
 import java.util.Optional;
 
-public interface ItemRepository {
+public interface ItemRepository extends JpaRepository<Item, Long> {
     Optional<Item> getItemById(Long itemId);
 
-    Item create(ItemCreateDto itemCreateDto);
+    Collection<Item> findByOwnerId(Long ownerId);
 
-    Item update(ItemCreateDto itemCreateDto);
+    @Query(" select i from Item i " +
+            "where i.available = true " +
+            "and (upper(i.name) like upper(concat('%', ?1, '%')) " +
+            "  or upper(i.description) like upper(concat('%', ?1, '%')))")
+    Collection<Item> searchAvailableToBooking(String text);
 
-    Collection<Item> getItemsFromUser(Long ownerId);
-
-    Collection<Item> itemSearchByNameOrDescription(String text);
 }
