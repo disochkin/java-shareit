@@ -7,7 +7,7 @@ import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.BookingQueryState;
 import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.booking.BookingTimeFilter;
-import ru.practicum.shareit.booking.dto.BookingAddRequest;
+import ru.practicum.shareit.booking.dto.BookingAddDto;
 import ru.practicum.shareit.booking.dto.BookingFrontDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
@@ -40,19 +40,19 @@ public class BookingService {
     }
 
     @Transactional
-    public BookingFrontDto create(Long bookerId, BookingAddRequest bookingAddRequest) {
-        if (bookingAddRequest.getStart().isAfter(bookingAddRequest.getEnd())) {
+    public BookingFrontDto create(Long bookerId, BookingAddDto bookingAddDto) {
+        if (bookingAddDto.getStart().isAfter(bookingAddDto.getEnd())) {
             throw new ValidationException("Время конца бронирования не должно быть меньше времени начала");
         }
-        Item itemToBook = itemRepository.getItemById(bookingAddRequest.getItemId())
-                .orElseThrow(() -> new NoSuchElementException(String.format(String.format("Предмет с id=%s не найден", bookingAddRequest.getItemId()))));
+        Item itemToBook = itemRepository.getItemById(bookingAddDto.getItemId())
+                .orElseThrow(() -> new NoSuchElementException(String.format(String.format("Предмет с id=%s не найден", bookingAddDto.getItemId()))));
         User booker = userRepository.getUserById(bookerId)
                 .orElseThrow(() -> new NoSuchElementException(String.format("Пользователь с id=%s не найден", bookerId)));
 
         if (!itemToBook.isAvailable()) {
-            throw new IllegalStateException(String.format("Предмет с id=%s не доступен для бронирования", bookingAddRequest.getItemId()));
+            throw new IllegalStateException(String.format("Предмет с id=%s не доступен для бронирования", bookingAddDto.getItemId()));
         }
-        Booking booking = BookingMapper.addBookingRequestToBooking(booker, itemToBook, bookingAddRequest);
+        Booking booking = BookingMapper.addBookingRequestToBooking(booker, itemToBook, bookingAddDto);
         bookingRepository.save(booking);
         return BookingMapper.bookingToFrontBookingDto(booking);
     }

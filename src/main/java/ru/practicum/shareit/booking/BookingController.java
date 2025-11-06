@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.booking.dto.BookingAddRequest;
+import ru.practicum.shareit.booking.dto.BookingAddDto;
 import ru.practicum.shareit.booking.dto.BookingFrontDto;
 import ru.practicum.shareit.booking.service.BookingService;
 
@@ -20,8 +20,8 @@ public class BookingController {
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
     public BookingFrontDto create(@RequestHeader("X-Sharer-User-Id") Long bookerId,
-                                  @Valid @RequestBody BookingAddRequest bookingAddRequest) {
-        return bookingService.create(bookerId, bookingAddRequest);
+                                  @Valid @RequestBody BookingAddDto bookingAddDto) {
+        return bookingService.create(bookerId, bookingAddDto);
     }
 
     // Подтверждение запроса на бронирование владельцем

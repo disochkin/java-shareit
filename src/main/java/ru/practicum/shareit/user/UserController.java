@@ -5,9 +5,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.user.dto.UserAddRequest;
+import ru.practicum.shareit.user.dto.UserAddDto;
 import ru.practicum.shareit.user.dto.UserFrontDto;
-import ru.practicum.shareit.user.dto.UserUpdateRequest;
+import ru.practicum.shareit.user.dto.UserUpdateDto;
 import ru.practicum.shareit.user.service.UserService;
 
 @RequiredArgsConstructor
@@ -19,8 +19,8 @@ public class UserController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public UserFrontDto create(@Valid @RequestBody UserAddRequest userAddRequest) {
-        return userService.create(userAddRequest);
+    public UserFrontDto create(@Valid @RequestBody UserAddDto userAddDto) {
+        return userService.create(userAddDto);
     }
 
     @GetMapping("/{userId}")
@@ -31,8 +31,8 @@ public class UserController {
 
     @PatchMapping("/{userId}")
     @ResponseStatus(HttpStatus.OK)
-    public UserFrontDto update(@Valid @PathVariable Long userId, @Valid @RequestBody UserUpdateRequest userUpdateRequest) {
-        return userService.update(userId, userUpdateRequest);
+    public UserFrontDto update(@Valid @PathVariable Long userId, @Valid @RequestBody UserUpdateDto userUpdateDto) {
+        return userService.update(userId, userUpdateDto);
     }
 
     @DeleteMapping("/{userId}")

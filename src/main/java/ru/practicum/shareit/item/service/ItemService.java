@@ -5,9 +5,9 @@ import ru.practicum.shareit.item.dto.*;
 import java.util.Collection;
 
 public interface ItemService {
-    ItemFrontDto create(Long ownerId, ItemAddRequest newItem);
+    ItemFrontDto create(Long ownerId, ItemAddDto newItem);
 
-    ItemFrontDto update(Long ownerId, ItemUpdateRequest itemUpdateRequest);
+    ItemFrontDto update(Long ownerId, ItemUpdateDto itemUpdateDto);
 
     ItemFrontDto getItemFrontDtoById(Long itemId);
 
@@ -17,6 +17,6 @@ public interface ItemService {
 
     Collection<ItemFrontDto> itemSearchByNameOrDescription(String text);
 
-    CommentCreatedDto createComment(Long authorId, Long itemId, CommentAddRequest commentAddRequest);
+    CommentCreatedDto createComment(Long authorId, Long itemId, CommentAddDto commentAddDto);
 
 }

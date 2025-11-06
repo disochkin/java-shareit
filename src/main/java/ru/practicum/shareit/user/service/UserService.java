@@ -5,9 +5,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.UserMapper;
-import ru.practicum.shareit.user.dto.UserAddRequest;
+import ru.practicum.shareit.user.dto.UserAddDto;
 import ru.practicum.shareit.user.dto.UserFrontDto;
-import ru.practicum.shareit.user.dto.UserUpdateRequest;
+import ru.practicum.shareit.user.dto.UserUpdateDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -26,8 +26,8 @@ public class UserService {
     }
 
     @Transactional
-    public UserFrontDto create(UserAddRequest userAddRequest) {
-        User createdUser = userRepository.save(UserMapper.userCreateDtoToUser(userAddRequest));
+    public UserFrontDto create(UserAddDto userAddDto) {
+        User createdUser = userRepository.save(UserMapper.userCreateDtoToUser(userAddDto));
         return UserMapper.userToUserFrontDto(createdUser);
     }
 
@@ -36,16 +36,16 @@ public class UserService {
     }
 
     @Transactional
-    public UserFrontDto update(Long userId, UserUpdateRequest userUpdateRequest) {
+    public UserFrontDto update(Long userId, UserUpdateDto userUpdateDto) {
         User updatedUser = getUserById(userId);
-        final Optional<User> userWithEmailOpt = userRepository.findAllByEmail(userUpdateRequest.getEmail());
+        final Optional<User> userWithEmailOpt = userRepository.findAllByEmail(userUpdateDto.getEmail());
         userWithEmailOpt
                 .filter(user -> !user.getId().equals(updatedUser.getId()))
                 .ifPresent(id -> {
-                    throw new ValidationException(String.format("Пользователь с email=%s уже существует", userUpdateRequest.getEmail()));
+                    throw new ValidationException(String.format("Пользователь с email=%s уже существует", userUpdateDto.getEmail()));
                 });
-        Optional.ofNullable(userUpdateRequest.getName()).ifPresent(updatedUser::setName);
-        Optional.ofNullable(userUpdateRequest.getEmail()).ifPresent(updatedUser::setEmail);
+        Optional.ofNullable(userUpdateDto.getName()).ifPresent(updatedUser::setName);
+        Optional.ofNullable(userUpdateDto.getEmail()).ifPresent(updatedUser::setEmail);
         userRepository.save(updatedUser);
         return UserMapper.userToUserFrontDto(updatedUser);
     }

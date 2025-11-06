@@ -4,6 +4,7 @@ import lombok.experimental.UtilityClass;
 import ru.practicum.shareit.booking.dto.BookingDtoOnlyDate;
 import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.List;
@@ -42,12 +43,20 @@ public class ItemMapper {
         return itemFrontDtoWithBookingDate;
     }
 
-    public static Item addItemRequestToItem(User owner, ItemAddRequest itemAddRequest) {
+    public static Item itemAddDtoToItem(ItemAddDto itemAddDto) {
         Item item = new Item();
-        item.setName(itemAddRequest.getName());
-        item.setDescription(itemAddRequest.getDescription());
-        item.setAvailable(itemAddRequest.getAvailable());
-        item.setOwner(owner);
+        item.setName(itemAddDto.getName());
+        item.setDescription(itemAddDto.getDescription());
+        item.setAvailable(itemAddDto.getAvailable());
         return item;
     }
+
+    public static ItemNestedRequestDto ItemToItemNestedRequestDto(Item item) {
+        ItemNestedRequestDto itemNestedRequestDto = new ItemNestedRequestDto();
+        itemNestedRequestDto.setId(item.getId());
+        itemNestedRequestDto.setName(item.getName());
+        itemNestedRequestDto.setId_owner(item.getOwner().getId());
+        return itemNestedRequestDto;
+    }
+
 }

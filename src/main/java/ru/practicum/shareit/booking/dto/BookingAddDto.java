@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-public class BookingAddRequest {
+public class BookingAddDto {
     @NotNull(message = "Время начала не может быть пустым")
     @FutureOrPresent(message = "Время начала бронирования не может быть в прошлом")
     private LocalDateTime start;

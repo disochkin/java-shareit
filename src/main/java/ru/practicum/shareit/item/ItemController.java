@@ -7,6 +7,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.request.model.ItemRequest;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -43,24 +44,24 @@ public class ItemController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ItemFrontDto create(@RequestHeader("X-Sharer-User-Id") Long ownerId,
-                               @Valid @RequestBody ItemAddRequest itemAddRequest) {
-        return itemService.create(ownerId, itemAddRequest);
+                               @Valid @RequestBody ItemAddDto itemAddDto) {
+        return itemService.create(ownerId, itemAddDto);
     }
 
     @PatchMapping("/{itemId}")
     @ResponseStatus(HttpStatus.OK)
     public ItemFrontDto update(@Valid @PathVariable Long itemId,
                                @RequestHeader("X-Sharer-User-Id") Long ownerId,
-                               @Valid @RequestBody ItemUpdateRequest itemUpdateRequest) {
-        itemUpdateRequest.setId(itemId);
-        return itemService.update(ownerId, itemUpdateRequest);
+                               @Valid @RequestBody ItemUpdateDto itemUpdateDto) {
+        itemUpdateDto.setId(itemId);
+        return itemService.update(ownerId, itemUpdateDto);
     }
 
     @PostMapping("/{itemId}/comment")
     @ResponseStatus(HttpStatus.CREATED)
     public CommentCreatedDto addComment(@Valid @PathVariable Long itemId,
                                         @RequestHeader("X-Sharer-User-Id") Long authorId,
-                                        @Valid @RequestBody CommentAddRequest commentAddRequest) {
-        return itemService.createComment(authorId, itemId, commentAddRequest);
+                                        @Valid @RequestBody CommentAddDto commentAddDto) {
+        return itemService.createComment(authorId, itemId, commentAddDto);
     }
 }

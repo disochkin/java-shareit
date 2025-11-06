@@ -11,7 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 
-public class CommentAddRequest {
+public class CommentAddDto {
     @NotNull(message = "Текст комментария не может быть пустым")
     private String text;
 }

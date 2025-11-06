@@ -10,8 +10,6 @@ import lombok.*;
 @Getter
 @Setter
 @ToString
-
-//@Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class User {
@@ -23,5 +21,4 @@ public class User {
     @NotBlank(message = "Адрес эл.почты не должен быть пустым")
     @Email
     private String email;
-
 }
