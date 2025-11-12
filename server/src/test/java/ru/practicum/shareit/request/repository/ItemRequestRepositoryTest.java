@@ -23,7 +23,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@Disabled
 @Transactional
 @SpringBootTest("spring.profiles.active=test")
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
