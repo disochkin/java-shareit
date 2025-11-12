@@ -23,7 +23,7 @@ public class ItemRequestMapper {
         itemRequestWithAnswer.setDescription(itemRequest.getDescription());
         itemRequestWithAnswer.setCreated(itemRequest.getCreated());
         itemRequestWithAnswer.setItems(
-                itemRequest.getAnswer().stream().map(ItemMapper::ItemToItemNestedRequestDto).toList());
+                itemRequest.getAnswer().stream().map(ItemMapper::itemToItemNestedRequestDto).toList());
         return itemRequestWithAnswer;
     }
 

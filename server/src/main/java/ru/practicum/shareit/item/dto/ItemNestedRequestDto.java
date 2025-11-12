@@ -12,5 +12,5 @@ import lombok.Setter;
 public class ItemNestedRequestDto {
     private Long id;
     private String name;
-    private Long id_owner;
+    private Long idOwner;
 }

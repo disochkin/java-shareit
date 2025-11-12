@@ -49,11 +49,11 @@ public class ItemMapper {
         return item;
     }
 
-    public static ItemNestedRequestDto ItemToItemNestedRequestDto(Item item) {
+    public static ItemNestedRequestDto itemToItemNestedRequestDto(Item item) {
         ItemNestedRequestDto itemNestedRequestDto = new ItemNestedRequestDto();
         itemNestedRequestDto.setId(item.getId());
         itemNestedRequestDto.setName(item.getName());
-        itemNestedRequestDto.setId_owner(item.getOwner().getId());
+        itemNestedRequestDto.setIdOwner(item.getOwner().getId());
         return itemNestedRequestDto;
     }
 
