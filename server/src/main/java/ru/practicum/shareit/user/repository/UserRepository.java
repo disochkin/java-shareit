@@ -6,11 +6,8 @@ import ru.practicum.shareit.user.model.User;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
-    //User create(User newUser);
 
     Optional<User> getUserById(Long userId);
-
-    //User update(User userId);
 
     Optional<User> findAllByEmail(String email);
 
