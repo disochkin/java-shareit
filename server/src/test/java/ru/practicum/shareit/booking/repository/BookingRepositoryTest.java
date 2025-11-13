@@ -1,5 +1,6 @@
 package ru.practicum.shareit.booking.repository;
 
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +11,6 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
-import jakarta.persistence.EntityManager;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -116,4 +116,5 @@ class BookingRepositoryTest {
 
         // then
         assertThat(result).isEmpty();
-    }}
+    }
+}

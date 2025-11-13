@@ -1,7 +1,5 @@
 package ru.practicum.shareit.user.service;
 
-import org.mockito.stubbing.OngoingStubbing;
-import ru.practicum.shareit.exception.ValidationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -9,6 +7,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.OngoingStubbing;
+import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.dto.UserAddDto;
 import ru.practicum.shareit.user.dto.UserFrontDto;
 import ru.practicum.shareit.user.dto.UserUpdateDto;
@@ -25,7 +25,6 @@ import static org.springframework.test.util.AssertionErrors.assertEquals;
 
 
 @ExtendWith(MockitoExtension.class)
-
 class UserServiceTest {
 
     @Mock
@@ -144,20 +143,20 @@ class UserServiceTest {
         verify(userRepository, never()).save(any());
     }
 
-@Test
-@DisplayName("delete — успешное удаление пользователя")
-void delete_ShouldCallRepositoryDelete_WhenUserExists() {
-    // given
-    when(userRepository.getUserById(1L)).thenReturn(Optional.of(existingUser));
+    @Test
+    @DisplayName("delete — успешное удаление пользователя")
+    void delete_ShouldCallRepositoryDelete_WhenUserExists() {
+        // given
+        when(userRepository.getUserById(1L)).thenReturn(Optional.of(existingUser));
 
-    // when
-    userService.delete(1L);
+        // when
+        userService.delete(1L);
 
-    // then
-    verify(userRepository).getUserById(1L);
-    verify(userRepository).delete(existingUser);
-    verifyNoMoreInteractions(userRepository);
-}
+        // then
+        verify(userRepository).getUserById(1L);
+        verify(userRepository).delete(existingUser);
+        verifyNoMoreInteractions(userRepository);
+    }
 
     @Test
     @DisplayName("delete — выбрасывает исключение, если пользователь не найден")
@@ -173,4 +172,4 @@ void delete_ShouldCallRepositoryDelete_WhenUserExists() {
         verify(userRepository).getUserById(99L);
         verify(userRepository, never()).delete(any());
     }
-    }
+}
