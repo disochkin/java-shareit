@@ -1,5 +1,6 @@
 package ru.practicum.shareit.user.service;
 
+import org.mockito.stubbing.OngoingStubbing;
 import ru.practicum.shareit.exception.ValidationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -64,16 +65,13 @@ class UserServiceTest {
     @Test
     @DisplayName("CreateUser тест - проверка создания пользователя")
     void testCreateUser_Success() {
-        // Настройка поведения mock'а репозитория
         UserAddDto userAddDto = new UserAddDto();
         userAddDto.setName("Alice");
         userAddDto.setEmail("alice@example.com");
-        when(userRepository.save(any(User.class))).thenReturn(expectedUser);
+        OngoingStubbing<User> userOngoingStubbing = when(userRepository.save(any(User.class))).thenReturn(expectedUser);
 
-        // Act (действие)
         UserFrontDto result = userService.create(userAddDto);
 
-        // Assert (утверждения)
         assertEquals("Id совпадает", expectedUser.getId(), result.getId());
         assertEquals("Name совпадает", expectedUser.getName(), result.getName());
         assertEquals("Email совпадает", expectedUser.getEmail(), result.getEmail());
@@ -83,13 +81,10 @@ class UserServiceTest {
     @Test
     @DisplayName("getUserById — успешное получение пользователя")
     void getUserById_ShouldReturnUser_WhenExists() {
-        // given
         when(userRepository.getUserById(1L)).thenReturn(Optional.of(existingUser));
 
-        // when
         UserFrontDto result = userService.getUserFrontDtoById(1L);
 
-        // then
         assertThat(result).isNotNull();
         assertThat(result.getId()).isEqualTo(1L);
         assertThat(result.getName()).isEqualTo("Alice");
@@ -100,16 +95,13 @@ class UserServiceTest {
     @Test
     @DisplayName("getUserById — ошибка, если пользователь не найден")
     void getUserById_ShouldThrowException_WhenNotFound() {
-        // given
         when(userRepository.getUserById(99L)).thenReturn(Optional.empty());
 
-        // when
         NoSuchElementException ex = assertThrows(
                 NoSuchElementException.class,
                 () -> userService.getUserFrontDtoById(99L)
         );
 
-        // then
         assertThat(ex.getMessage()).contains("id=99");
         verify(userRepository).getUserById(99L);
     }
@@ -117,7 +109,6 @@ class UserServiceTest {
     @Test
     @DisplayName("Успешное обновление пользователя")
     void updateUser_Success() {
-        // given
         UserUpdateDto dto = new UserUpdateDto();
         dto.setName("Alice Updated");
         dto.setEmail("alice.updated@example.com");
@@ -127,10 +118,8 @@ class UserServiceTest {
                 .thenReturn(Optional.empty());
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        // when
         UserFrontDto result = userService.update(1L, dto);
 
-        // then
         assertThat(result.getName()).isEqualTo("Alice Updated");
         assertThat(result.getEmail()).isEqualTo("alice.updated@example.com");
 
@@ -141,7 +130,6 @@ class UserServiceTest {
     @Test
     @DisplayName("Ошибка при попытке обновить email на уже существующий")
     void updateUser_EmailAlreadyExists_ShouldThrowException() {
-        // given
         UserUpdateDto dto = new UserUpdateDto();
         dto.setEmail("bob@example.com");
 
@@ -149,35 +137,40 @@ class UserServiceTest {
         when(userRepository.findAllByEmail("bob@example.com"))
                 .thenReturn(Optional.of(anotherUser));
 
-        // when
         ValidationException ex = assertThrows(ValidationException.class,
                 () -> userService.update(1L, dto));
 
-        // then
         assertThat(ex.getMessage()).contains("bob@example.com");
         verify(userRepository, never()).save(any());
     }
-//
-//    @Test
-//    void testDeleteUser_Success() {
-//        // Arrange (подготовительные шаги)
-//        Long userId = 1L;
-//
-//        // Эмулируем существование пользователя с указанным id
-//        User existingUser = new User();
-//        existingUser.setId(userId);
-//        existingUser.setName("existing_user");
-//        existingUser.setEmail("exist@example.com");
-//
-//        // Настраиваем поведение mock'а репозитория
-//        when(userRepository.findById(userId)).thenReturn(java.util.Optional.of(existingUser)); // findById вернет существующего пользователя
-//
-//        // Act (действие)
-//        userService.delete(userId);
-//
-//        // Assert (утверждение)
-//        verify(userRepository, times(1)).delete(existingUser);}
-//
-//
 
+@Test
+@DisplayName("delete — успешное удаление пользователя")
+void delete_ShouldCallRepositoryDelete_WhenUserExists() {
+    // given
+    when(userRepository.getUserById(1L)).thenReturn(Optional.of(existingUser));
+
+    // when
+    userService.delete(1L);
+
+    // then
+    verify(userRepository).getUserById(1L);
+    verify(userRepository).delete(existingUser);
+    verifyNoMoreInteractions(userRepository);
+}
+
+    @Test
+    @DisplayName("delete — выбрасывает исключение, если пользователь не найден")
+    void delete_ShouldThrowException_WhenUserNotFound() {
+        when(userRepository.getUserById(99L)).thenReturn(Optional.empty());
+
+        NoSuchElementException ex = assertThrows(
+                NoSuchElementException.class,
+                () -> userService.delete(99L)
+        );
+
+        assertThat(ex.getMessage()).contains("id=99");
+        verify(userRepository).getUserById(99L);
+        verify(userRepository, never()).delete(any());
+    }
     }
