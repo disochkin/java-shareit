@@ -22,10 +22,10 @@ public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;                     // Уникальный идентификатор бронирования
-    @FutureOrPresent(message = "Время начала бронирования не может быть в прошлом")
+    //@FutureOrPresent(message = "Время начала бронирования не может быть в прошлом")
     @Column(name = "start_date")
     private LocalDateTime startDate;         // Дата и время начала бронирования
-    @FutureOrPresent(message = "Время завершения бронирования не может быть в прошлом")
+    //@FutureOrPresent(message = "Время завершения бронирования не может быть в прошлом")
     @Column(name = "end_date")
     private LocalDateTime endDate;           // Дата и время окончания бронирования
     @ManyToOne()
