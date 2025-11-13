@@ -1,122 +1,169 @@
 package ru.practicum.shareit.booking;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import ru.practicum.shareit.booking.dto.BookingAddDto;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.shareit.booking.dto.BookingFrontDto;
+import ru.practicum.shareit.booking.model.*;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-@WebMvcTest(BookingController.class)
-class BookingControllerTest {
+@ExtendWith(MockitoExtension.class)
+class BookingServiceGetBookingOfUserByStateTest {
 
-    private static final String HEADER_USER = "X-Sharer-User-Id";
-    @Autowired
-    private MockMvc mockMvc;
-    @MockBean
+    @Mock
+    private BookingRepository bookingRepository;
+
+    @Mock
+    private UserRepository userRepository;
+
+    @InjectMocks
     private BookingService bookingService;
-    @Autowired
-    private ObjectMapper objectMapper;
+
+    private User booker;
+    private Item item;
+    private Booking booking;
+
+    @BeforeEach
+    void setUp() {
+        booker = new User();
+        booker.setId(1L);
+        booker.setName("Booker");
+        booker.setEmail("booker@mail.com");
+
+        User owner = new User();
+        owner.setId(2L);
+        owner.setName("Owner");
+
+        item = new Item();
+        item.setId(10L);
+        item.setName("Drill");
+        item.setOwner(owner);
+        item.setAvailable(true);
+
+        booking = new Booking();
+        booking.setId(100L);
+        booking.setBooker(booker);
+        booking.setItem(item);
+        booking.setStartDate(LocalDateTime.now().minusDays(1));
+        booking.setEndDate(LocalDateTime.now().plusDays(1));
+        booking.setStatus(BookingStatus.APPROVED);
+    }
 
     @Test
-    void createBooking_ShouldReturnCreatedBooking() throws Exception {
-        // given
-        LocalDateTime startTime = LocalDateTime.now().plusDays(1).truncatedTo(ChronoUnit.SECONDS);
-        LocalDateTime endTime = LocalDateTime.now().plusDays(2).truncatedTo(ChronoUnit.SECONDS);
-        BookingAddDto requestDto = new BookingAddDto();
-        requestDto.setItemId(1L);
-        requestDto.setStart(startTime);
-        requestDto.setEnd(endTime);
-        BookingFrontDto responseDto = new BookingFrontDto();
-        responseDto.setId(1L);
-        responseDto.setStart(startTime);
-        responseDto.setEnd(endTime);
-        given(bookingService.create(anyLong(), any(BookingAddDto.class)))
-                .willReturn(responseDto);
+    @DisplayName("ALL — возвращает все бронирования пользователя")
+    void getBookingOfUserByState_All() {
+        when(userRepository.getUserById(1L)).thenReturn(Optional.of(booker));
+        when(bookingRepository.findByBookerIdOrderByStartDateDesc(1L))
+                .thenReturn(List.of(booking));
 
-        mockMvc.perform(post("/bookings")
-                        .header(HEADER_USER, 10L)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDto)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.start").value(startTime.truncatedTo(ChronoUnit.SECONDS).toString()))
-                .andExpect(jsonPath("$.end").value(endTime.truncatedTo(ChronoUnit.SECONDS).toString()));
+        List<BookingFrontDto> result = bookingService.getBookingOfUserByState(1L, BookingQueryState.ALL);
+
+        assertThat(result).hasSize(1);
+        verify(bookingRepository).findByBookerIdOrderByStartDateDesc(1L);
+    }
+
+    @Test
+    @DisplayName("CURRENT — активные бронирования на текущий момент")
+    void getBookingOfUserByState_Current() {
+        when(userRepository.getUserById(1L)).thenReturn(Optional.of(booker));
+        when(bookingRepository.findByBookerIdAndStartDateBeforeAndEndDateAfterOrderByStartDateDesc(
+                anyLong(), any(LocalDateTime.class), any(LocalDateTime.class)))
+                .thenReturn(List.of(booking));
+
+        List<BookingFrontDto> result = bookingService.getBookingOfUserByState(1L, BookingQueryState.CURRENT);
+
+        assertThat(result).hasSize(1);
+        verify(bookingRepository).findByBookerIdAndStartDateBeforeAndEndDateAfterOrderByStartDateDesc(
+                eq(1L), any(LocalDateTime.class), any(LocalDateTime.class));
+    }
+
+    @Test
+    @DisplayName("PAST — завершённые бронирования")
+    void getBookingOfUserByState_Past() {
+        when(userRepository.getUserById(1L)).thenReturn(Optional.of(booker));
+        when(bookingRepository.findByBookerIdAndEndDateBeforeOrderByStartDateDesc(
+                anyLong(), any(LocalDateTime.class)))
+                .thenReturn(List.of(booking));
+
+        List<BookingFrontDto> result = bookingService.getBookingOfUserByState(1L, BookingQueryState.PAST);
+
+        assertThat(result).hasSize(1);
+        verify(bookingRepository).findByBookerIdAndEndDateBeforeOrderByStartDateDesc(eq(1L), any(LocalDateTime.class));
+    }
+
+    @Test
+    @DisplayName("FUTURE — предстоящие бронирования")
+    void getBookingOfUserByState_Future() {
+        when(userRepository.getUserById(1L)).thenReturn(Optional.of(booker));
+        when(bookingRepository.findByBookerIdAndStartDateAfterOrderByStartDateDesc(
+                anyLong(), any(LocalDateTime.class)))
+                .thenReturn(List.of(booking));
+
+        List<BookingFrontDto> result = bookingService.getBookingOfUserByState(1L, BookingQueryState.FUTURE);
+
+        assertThat(result).hasSize(1);
+        verify(bookingRepository).findByBookerIdAndStartDateAfterOrderByStartDateDesc(eq(1L), any(LocalDateTime.class));
+    }
+
+    @Test
+    @DisplayName("WAITING — бронирования в ожидании подтверждения")
+    void getBookingOfUserByState_Waiting() {
+        when(userRepository.getUserById(1L)).thenReturn(Optional.of(booker));
+        when(bookingRepository.findByBookerIdAndStatusOrderByStartDateDesc(1L, BookingStatus.WAITING))
+                .thenReturn(List.of(booking));
+
+        List<BookingFrontDto> result = bookingService.getBookingOfUserByState(1L, BookingQueryState.WAITING);
+
+        assertThat(result).hasSize(1);
+        verify(bookingRepository).findByBookerIdAndStatusOrderByStartDateDesc(1L, BookingStatus.WAITING);
+    }
+
+    @Test
+    @DisplayName("REJECTED — отклонённые бронирования")
+    void getBookingOfUserByState_Rejected() {
+        when(userRepository.getUserById(1L)).thenReturn(Optional.of(booker));
+        when(bookingRepository.findByBookerIdAndStatusOrderByStartDateDesc(1L, BookingStatus.REJECTED))
+                .thenReturn(List.of(booking));
+
+        List<BookingFrontDto> result = bookingService.getBookingOfUserByState(1L, BookingQueryState.REJECTED);
+
+        assertThat(result).hasSize(1);
+        verify(bookingRepository).findByBookerIdAndStatusOrderByStartDateDesc(1L, BookingStatus.REJECTED);
+    }
+
+    @Test
+    @DisplayName("Пользователь не найден — выбрасывает NoSuchElementException")
+    void getBookingOfUserByState_UserNotFound() {
+        when(userRepository.getUserById(999L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> bookingService.getBookingOfUserByState(999L, BookingQueryState.ALL))
+                .isInstanceOf(NoSuchElementException.class)
+                .hasMessageContaining("Пользователь с id=999 не найден");
     }
 
 //    @Test
-//    void approveBooking_ShouldReturnApprovedBooking() throws Exception {
-//        // given
-//        LocalDateTime startTime = LocalDateTime.now().plusDays(1).truncatedTo(ChronoUnit.SECONDS);
-//        LocalDateTime endTime = LocalDateTime.now().plusDays(2).truncatedTo(ChronoUnit.SECONDS);
-//        BookingAddDto requestDto = new BookingAddDto();
-//        requestDto.setItemId(1L);
-//        requestDto.setStart(startTime);
-//        requestDto.setEnd(endTime);
-//        given(bookingService.approve(1L, 1L, true)).willReturn(dto);
-//        // when + then
-//        mockMvc.perform(patch("/bookings/1")
-//                        .header(HEADER_USER, 1L)
-//                        .param("approved", "true"))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.status").value("APPROVED"));
-//    }
+//    @DisplayName("Неизвестный статус — выбрасывает ValidationException")
+//    void getBookingOfUserByState_InvalidState() {
+//        when(userRepository.getUserById(1L)).thenReturn(Optional.of(booker));
 //
-//    @Test
-//    void getBooking_ShouldReturnBooking() throws Exception {
-//        // given
-//        BookingFrontDto dto = new BookingFrontDto(1L, "WAITING");
-//        given(bookingService.getBooking(1L, 1L)).willReturn(dto);
-//
-//        // when + then
-//        mockMvc.perform(get("/bookings/1")
-//                        .header(HEADER_USER, 1L))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$.id").value(1))
-//                .andExpect(jsonPath("$.status").value("WAITING"));
-//    }
-//
-//    @Test
-//    void getBookingsByUser_ShouldReturnList() throws Exception {
-//        // given
-//        BookingFrontDto dto = new BookingFrontDto(1L, "REJECTED");
-//        given(bookingService.getBookingOfUserByState(1L, BookingQueryState.ALL))
-//                .willReturn(List.of(dto));
-//
-//        // when + then
-//        mockMvc.perform(get("/bookings")
-//                        .header(HEADER_USER, 1L)
-//                        .param("state", "ALL"))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$[0].status").value("REJECTED"));
-//    }
-//
-//    @Test
-//    void getBookingsOfOwner_ShouldReturnList() throws Exception {
-//        // given
-//        BookingFrontDto dto = new BookingFrontDto(5L, "WAITING");
-//        given(bookingService.getBookingOfOwnerByState(1L, BookingQueryState.ALL))
-//                .willReturn(List.of(dto));
-//
-//        // when + then
-//        mockMvc.perform(get("/bookings/owner")
-//                        .header(HEADER_USER, 1L)
-//                        .param("state", "ALL"))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$[0].status").value("WAITING"));
+//        assertThatThrownBy(() -> bookingService.getBookingOfUserByState(1L, null))
+//                .isInstanceOf(ValidationException.class)
+//                .hasMessageContaining("Недопустимый статус");
 //    }
 }
