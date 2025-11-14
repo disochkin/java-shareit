@@ -161,7 +161,7 @@ class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateDto)))
                 .andExpect(status().is5xxServerError())
-                .andExpect(jsonPath("$.error").value("Пользователь с email=bob@example.com уже существует"));
+                .andExpect(jsonPath("$.message").value("Пользователь с email=bob@example.com уже существует"));
 
         Mockito.verify(userService).update(eq(1L), any(UserUpdateDto.class));
     }
