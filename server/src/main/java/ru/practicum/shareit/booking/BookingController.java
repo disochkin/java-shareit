@@ -54,6 +54,4 @@ public class BookingController {
                                                                   defaultValue = "ALL") BookingQueryState bookingQueryState) {
         return bookingService.getBookingOfOwnerByState(ownerId, bookingQueryState);
     }
-
-
 }

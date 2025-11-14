@@ -19,6 +19,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "FROM Booking b " +
             "WHERE b.booker.id = :bookerId " +
             "AND b.item.id = :itemId " +
+            "AND b.endDate < CURRENT_TIMESTAMP " +
             "AND b.status = 'APPROVED'"
     )
     List<Booking> checkApprovedBookingExist(Long bookerId, Long itemId);
