@@ -33,30 +33,8 @@ public class ItemClient extends BaseClient {
         return post("/" + itemId + "/comment", authorId, commentAddDto);
     }
 
-    //    public ResponseEntity<Object> getBookings(long userId, BookingState state, Integer from, Integer size) {
-//        Map<String, Object> parameters = Map.of(
-//                "state", state.name(),
-//                "from", from,
-//                "size", size
-//        );
-//        return get("?state={state}&from={from}&size={size}", userId, parameters);
-//    }
-//
-//
-//    public ResponseEntity<Object> bookItem(long userId, BookItemRequestDto requestDto) {
-//        return post("", userId, requestDto);
-//    }
-//
     public ResponseEntity<Object> getItem(long itemId) {
         return get("/" + itemId);
     }
-
-//    public ResponseEntity<Object> updateUser(long userId, UserUpdateDto userUpdateDto) {
-//        return patch(String.format("/%s",userId), userUpdateDto);
-//    }
-//
-//    public ResponseEntity<Object> deleteUser(long userId) {
-//        return delete(String.format("/%s",userId));
-//    }
 
 }

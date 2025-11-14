@@ -26,7 +26,7 @@ public class ItemController {
         return itemClient.createItem(ownerId, itemAddDto);
     }
 
-    @GetMapping("/{userId}")
+    @GetMapping("/{itemId}")
     public ResponseEntity<Object> getItem(@PathVariable Long itemId) {
         log.info("Get itemId={}", itemId);
         return itemClient.getItem(itemId);
