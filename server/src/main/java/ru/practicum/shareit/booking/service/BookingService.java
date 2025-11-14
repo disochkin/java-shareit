@@ -30,15 +30,6 @@ public class BookingService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
 
-    private Booking getBookingById(Long bookingId) {
-        return bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new NoSuchElementException(String.format("Запрос на бронирование с id=%s не найден", bookingId)));
-    }
-
-    public BookingFrontDto getItemFrontDtoWithBookingDate(Long bookingId) {
-        return BookingMapper.bookingToFrontBookingDto(getBookingById(bookingId));
-    }
-
     @Transactional
     public BookingFrontDto create(Long bookerId, BookingAddDto bookingAddDto) {
         if (bookingAddDto.getStart().isAfter(bookingAddDto.getEnd())) {

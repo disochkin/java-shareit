@@ -130,6 +130,44 @@ class BookingServiceGetBookingOfOwnerByStateTest {
         verify(bookingRepository).findByOwnerIdAndStatus(1L, null, BookingTimeFilter.FUTURE.toString());
     }
 
+    @Test
+    @DisplayName("Возвращает ожидающие подтверждения бронирования при запросе со статусом WAITING")
+    void getBookingOfOwnerByState_Waiting() {
+        booking.setStartDate(LocalDateTime.now().plusHours(1));
+        booking.setEndDate(LocalDateTime.now().plusHours(5));
+        booking.setStatus(BookingStatus.WAITING);
+
+        when(userRepository.getUserById(1L)).thenReturn(Optional.of(owner));
+        when(bookingRepository.findByOwnerIdAndStatus(1L, BookingStatus.WAITING, null))
+                .thenReturn(List.of(booking));
+
+        List<BookingFrontDto> result = bookingService.getBookingOfOwnerByState(1L, BookingQueryState.WAITING);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getId()).isEqualTo(100L);
+
+        verify(bookingRepository).findByOwnerIdAndStatus(1L, BookingStatus.WAITING, null);
+    }
+
+    @Test
+    @DisplayName("Возвращает отклонённые бронирования при запросе со статусом REJECTED")
+    void getBookingOfOwnerByState_Rejected() {
+        booking.setStartDate(LocalDateTime.now().minusDays(2));
+        booking.setEndDate(LocalDateTime.now().minusDays(1));
+        booking.setStatus(BookingStatus.REJECTED);
+
+        when(userRepository.getUserById(1L)).thenReturn(Optional.of(owner));
+        when(bookingRepository.findByOwnerIdAndStatus(1L, BookingStatus.REJECTED, null))
+                .thenReturn(List.of(booking));
+
+        List<BookingFrontDto> result = bookingService.getBookingOfOwnerByState(1L, BookingQueryState.REJECTED);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getId()).isEqualTo(100L);
+
+        verify(bookingRepository).findByOwnerIdAndStatus(1L, BookingStatus.REJECTED, null);
+    }
+
 
     @Test
     @DisplayName("Бросает исключение, если пользователь не найден")
