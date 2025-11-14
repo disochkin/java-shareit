@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.shareit.booking.BookingQueryState;
 import ru.practicum.shareit.booking.BookingStatus;
+import ru.practicum.shareit.booking.BookingTimeFilter;
 import ru.practicum.shareit.booking.dto.BookingFrontDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
@@ -78,39 +79,56 @@ class BookingServiceGetBookingOfOwnerByStateTest {
         verify(bookingRepository).findByOwnerIdAndStatus(1L, null, null);
     }
 
-//    @Test
-//    @DisplayName("Возвращает все бронирования при запросе со статусом PAST")
-//    void getBookingOfOwnerByState_Past() {
-//        booking.setStartDate(LocalDateTime.now().minusDays(2));
-//        booking.setEndDate(LocalDateTime.now().minusDays(1));
-//
-//        when(userRepository.getUserById(1L)).thenReturn(Optional.of(owner));
-//        when(bookingRepository.findByOwnerIdAndStatus(1L, null, null))
-//                .thenReturn(List.of(booking));
-//
-//        List<BookingFrontDto> result = bookingService.getBookingOfOwnerByState(1L, BookingQueryState.PAST);
-//
-//        assertThat(result).hasSize(1);
-//        assertThat(result.get(0).getId()).isEqualTo(100L);
-//        verify(bookingRepository).findByOwnerIdAndStatus(1L, null, null);
-//    }
-//
-//    @Test
-//    @DisplayName("Возвращает все бронирования при запросе со статусом CURRENT")
-//    void getBookingOfOwnerByState_Current() {
-//        booking.setStartDate(LocalDateTime.now().minusDays(2));
-//        booking.setEndDate(LocalDateTime.now().plusDays(1));
-//
-//        when(userRepository.getUserById(1L)).thenReturn(Optional.of(owner));
-//        when(bookingRepository.findByOwnerIdAndStatus(1L, null, null))
-//                .thenReturn(List.of(booking));
-//
-//        List<BookingFrontDto> result = bookingService.getBookingOfOwnerByState(1L, BookingQueryState.CURRENT);
-//
-//        assertThat(result).hasSize(1);
-//        assertThat(result.get(0).getId()).isEqualTo(100L);
-//        verify(bookingRepository).findByOwnerIdAndStatus(1L, null, null);
-//    }
+    @Test
+    @DisplayName("Возвращает прошлые бронирования при запросе со статусом PAST")
+    void getBookingOfOwnerByState_Past() {
+        booking.setStartDate(LocalDateTime.now().minusDays(3));
+        booking.setEndDate(LocalDateTime.now().minusDays(1));
+
+        when(userRepository.getUserById(1L)).thenReturn(Optional.of(owner));
+        when(bookingRepository.findByOwnerIdAndStatus(1L, null, BookingTimeFilter.PAST.name()))
+                .thenReturn(List.of(booking));
+
+        List<BookingFrontDto> result = bookingService.getBookingOfOwnerByState(1L, BookingQueryState.PAST);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getId()).isEqualTo(100L);
+        verify(bookingRepository).findByOwnerIdAndStatus(1L, null, BookingTimeFilter.PAST.name());
+    }
+
+    @Test
+    @DisplayName("Возвращает текущие бронирования при запросе со статусом CURRENT")
+    void getBookingOfOwnerByState_Current() {
+        booking.setStartDate(LocalDateTime.now().minusHours(1));
+        booking.setEndDate(LocalDateTime.now().plusHours(2));
+
+        when(userRepository.getUserById(1L)).thenReturn(Optional.of(owner));
+        when(bookingRepository.findByOwnerIdAndStatus(1L, null, BookingTimeFilter.CURRENT.name()))
+                .thenReturn(List.of(booking));
+
+        List<BookingFrontDto> result = bookingService.getBookingOfOwnerByState(1L, BookingQueryState.CURRENT);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getId()).isEqualTo(100L);
+        verify(bookingRepository).findByOwnerIdAndStatus(1L, null, BookingTimeFilter.CURRENT.name());
+    }
+
+    @Test
+    @DisplayName("Возвращает будущие бронирования при запросе со статусом FUTURE")
+    void getBookingOfOwnerByState_Future() {
+        booking.setStartDate(LocalDateTime.now().plusDays(1));
+        booking.setEndDate(LocalDateTime.now().plusDays(3));
+
+        when(userRepository.getUserById(1L)).thenReturn(Optional.of(owner));
+        when(bookingRepository.findByOwnerIdAndStatus(1L, null, BookingTimeFilter.FUTURE.toString()))
+                .thenReturn(List.of(booking));
+
+        List<BookingFrontDto> result = bookingService.getBookingOfOwnerByState(1L, BookingQueryState.FUTURE);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getId()).isEqualTo(100L);
+        verify(bookingRepository).findByOwnerIdAndStatus(1L, null, BookingTimeFilter.FUTURE.toString());
+    }
 
 
     @Test
