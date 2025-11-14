@@ -19,7 +19,8 @@ import java.util.List;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
 class ItemControllerTest {
@@ -161,4 +162,37 @@ class ItemControllerTest {
                 .andExpect(jsonPath("$.authorName").value("John"));
 
     }
+
+    @Test
+    @DisplayName("Возвращает список вещей по тексту поиска")
+    void searchItems_success() throws Exception {
+        ItemFrontDto itemDto = new ItemFrontDto();
+        itemDto.setId(1L);
+        itemDto.setName("Drill");
+        itemDto.setDescription("Electric drill");
+        itemDto.setAvailable(true);
+
+        when(itemService.itemSearchByNameOrDescription("drill"))
+                .thenReturn(List.of(itemDto));
+
+        mockMvc.perform(get("/items/search")
+                        .param("text", "drill"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].name").value("Drill"))
+                .andExpect(jsonPath("$[0].description").value("Electric drill"))
+                .andExpect(jsonPath("$[0].available").value(true));
+    }
+
+    @Test
+    @DisplayName("Возвращает пустой список, если текст поиска пустой или пробелы")
+    void searchItems_emptyText() throws Exception {
+        mockMvc.perform(get("/items/search")
+                        .param("text", "   "))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
+    }
+
+
 }

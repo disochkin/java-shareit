@@ -4,22 +4,23 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.booking.dto.BookingDtoOnlyDate;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.AccessViolationException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.dto.*;
-import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.model.Comment;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
-import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.repository.BookingRepository;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -239,10 +240,10 @@ class ItemServiceImplTest {
         when(userRepository.getUserById(1L)).thenReturn(Optional.of(owner));
         when(itemRepository.findByOwnerId(1L)).thenReturn(List.of(item));
         when(bookingRepository.getLastBookingById(item.getId())).thenReturn(
-                new BookingDtoOnlyDate(100L,  LocalDateTime.now().minusDays(2), LocalDateTime.now().minusDays(1), BookingStatus.WAITING)
+                new BookingDtoOnlyDate(100L, LocalDateTime.now().minusDays(2), LocalDateTime.now().minusDays(1), BookingStatus.WAITING)
         );
         when(bookingRepository.getNextBookingById(item.getId())).thenReturn(
-                new BookingDtoOnlyDate(101L,  LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), BookingStatus.WAITING)
+                new BookingDtoOnlyDate(101L, LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), BookingStatus.WAITING)
         );
         when(commentRepository.findAllByItemId(item.getId())).thenReturn(List.of());
 
