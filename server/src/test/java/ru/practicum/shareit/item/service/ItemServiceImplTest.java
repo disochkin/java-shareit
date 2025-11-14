@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.practicum.shareit.booking.BookingStatus;
+import ru.practicum.shareit.booking.dto.BookingDtoOnlyDate;
 import ru.practicum.shareit.exception.AccessViolationException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.dto.*;
@@ -20,7 +22,9 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
@@ -56,6 +60,56 @@ class ItemServiceImplTest {
         item.setId(10L);
         item.setName("Drill");
         item.setOwner(owner);
+    }
+
+    @Test
+    @DisplayName("Возвращает список вещей пользователя с комментариями")
+    void getItemsFromUser_success() {
+        owner = new User();
+        owner.setId(1L);
+        owner.setName("Owner");
+
+        item = new Item();
+        item.setId(10L);
+        item.setName("Drill");
+        item.setDescription("Electric drill");
+        item.setAvailable(true);
+        item.setOwner(owner);
+
+        // Мокируем возврат пользователя
+        when(userRepository.getUserById(1L)).thenReturn(Optional.of(owner));
+
+        // Мокируем возврат списка вещей
+        when(itemRepository.findByOwnerId(1L)).thenReturn(List.of(item));
+
+        // Мокируем возврат комментариев (пустой список)
+        when(commentRepository.findAllByItemId(item.getId())).thenReturn(List.of());
+
+        // Вызов метода
+        Collection<ItemFrontDto> result = itemService.getItemsFromUser(1L);
+
+        // Проверка результата
+        assertThat(result).hasSize(1);
+        ItemFrontDto dto = result.iterator().next();
+        assertThat(dto.getId()).isEqualTo(10L);
+        assertThat(dto.getName()).isEqualTo("Drill");
+        assertThat(dto.getDescription()).isEqualTo("Electric drill");
+        assertThat(dto.isAvailable()).isTrue();
+
+        // Проверка взаимодействий с моками
+        verify(userRepository).getUserById(1L);
+        verify(itemRepository).findByOwnerId(1L);
+        verify(commentRepository).findAllByItemId(item.getId());
+    }
+
+    @Test
+    @DisplayName("Бросает исключение, если пользователь не найден")
+    void getItemsFromUser_userNotFound() {
+        when(userRepository.getUserById(999L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> itemService.getItemsFromUser(999L))
+                .isInstanceOf(NoSuchElementException.class)
+                .hasMessageContaining("Пользователь с id 999 не найден");
     }
 
     @Test
@@ -177,4 +231,51 @@ class ItemServiceImplTest {
                 .isInstanceOf(ValidationException.class)
                 .hasMessageContaining("Пользователь id=2 не арендовал вещь с id=10");
     }
+
+    @Test
+    @DisplayName("Возвращает список вещей владельца с данными бронирования и комментариями")
+    void getOwnerItemsWithBookingDetails_success() {
+        // Моки
+        when(userRepository.getUserById(1L)).thenReturn(Optional.of(owner));
+        when(itemRepository.findByOwnerId(1L)).thenReturn(List.of(item));
+        when(bookingRepository.getLastBookingById(item.getId())).thenReturn(
+                new BookingDtoOnlyDate(100L,  LocalDateTime.now().minusDays(2), LocalDateTime.now().minusDays(1), BookingStatus.WAITING)
+        );
+        when(bookingRepository.getNextBookingById(item.getId())).thenReturn(
+                new BookingDtoOnlyDate(101L,  LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), BookingStatus.WAITING)
+        );
+        when(commentRepository.findAllByItemId(item.getId())).thenReturn(List.of());
+
+        // Вызов метода
+        Collection<ItemFrontDtoWithBookingDate> result = itemService.getOwnerItemsWithBookingDetails(1L);
+
+        // Проверки
+        assertThat(result).hasSize(1);
+        ItemFrontDtoWithBookingDate dto = result.iterator().next();
+        assertThat(dto.getId()).isEqualTo(item.getId());
+        assertThat(dto.getName()).isEqualTo(item.getName());
+        assertThat(dto.getDescription()).isEqualTo(item.getDescription());
+        assertThat(dto.isAvailable()).isEqualTo(item.isAvailable());
+        assertThat(dto.getLastBooking().getId()).isEqualTo(100L);
+        assertThat(dto.getNextBooking().getId()).isEqualTo(101L);
+
+        // Проверка взаимодействий с моками
+        verify(userRepository).getUserById(1L);
+        verify(itemRepository).findByOwnerId(1L);
+        verify(bookingRepository).getLastBookingById(item.getId());
+        verify(bookingRepository).getNextBookingById(item.getId());
+        verify(commentRepository).findAllByItemId(item.getId());
+    }
+
+    @Test
+    @DisplayName("Бросает исключение, если пользователь не найден")
+    void getOwnerItemsWithBookingDetails_userNotFound() {
+        when(userRepository.getUserById(999L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> itemService.getOwnerItemsWithBookingDetails(999L))
+                .isInstanceOf(NoSuchElementException.class)
+                .hasMessageContaining("Пользователь с id 999 не найден");
+    }
+
+
 }
