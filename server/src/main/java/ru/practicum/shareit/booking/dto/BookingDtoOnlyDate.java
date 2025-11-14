@@ -12,10 +12,7 @@ import java.time.LocalDateTime;
 @Setter
 public class BookingDtoOnlyDate {
     private Long id;
-
     private LocalDateTime startDate;
-
     private LocalDateTime endDate;
-
     private BookingStatus status;
 }
