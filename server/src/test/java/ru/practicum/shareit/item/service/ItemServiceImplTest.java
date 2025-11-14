@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.booking.dto.BookingDtoOnlyDate;
@@ -13,6 +14,8 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.AccessViolationException;
 import ru.practicum.shareit.exception.ValidationException;
+import ru.practicum.shareit.item.CommentMapper;
+import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
@@ -29,6 +32,8 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,6 +49,10 @@ class ItemServiceImplTest {
     private CommentRepository commentRepository;
     @Mock
     private ItemRequestRepository itemRequestRepository;
+
+    private CommentMapper commentMapper;
+
+    private ItemMapper itemMapper;
 
     @InjectMocks
     private ItemServiceImpl itemService;
@@ -278,5 +287,43 @@ class ItemServiceImplTest {
                 .hasMessageContaining("Пользователь с id 999 не найден");
     }
 
+    @Test
+    void itemSearchByNameOrDescription_whenItemsFound_thenReturnDtos() {
+        // --- Данные для теста ---
+        String text = "дрель";
 
+        Item item = new Item();
+        item.setId(1L);
+
+        Comment comment = new Comment();
+        comment.setId(10L);
+
+        CommentNestedDto commentDto = new CommentNestedDto();
+        ItemFrontDto frontDto = new ItemFrontDto();
+
+        // --- Мок репозиториев ---
+        when(itemRepository.searchAvailableToBooking(text)).thenReturn(List.of(item));
+        when(commentRepository.findAllByItemId(1L)).thenReturn(List.of(comment));
+
+        // --- Мок статических мапперов ---
+        try (MockedStatic<CommentMapper> commentMapperMock = mockStatic(CommentMapper.class);
+             MockedStatic<ItemMapper> itemMapperMock = mockStatic(ItemMapper.class)) {
+
+            commentMapperMock.when(() -> CommentMapper.commentToCommentNestedDtoList(List.of(comment)))
+                    .thenReturn(List.of(commentDto));
+
+            itemMapperMock.when(() -> ItemMapper.itemToFrontItemDto(List.of(commentDto), item))
+                    .thenReturn(frontDto);
+
+            // --- Вызов тестируемого метода ---
+            Collection<ItemFrontDto> result = itemService.itemSearchByNameOrDescription(text);
+
+            // --- Проверки ---
+            assertEquals(1, result.size());
+            assertTrue(result.contains(frontDto));
+
+            verify(itemRepository).searchAvailableToBooking(text);
+            verify(commentRepository).findAllByItemId(1L);
+        }
+    }
 }
