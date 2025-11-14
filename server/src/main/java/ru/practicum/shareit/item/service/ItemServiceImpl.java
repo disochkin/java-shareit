@@ -21,6 +21,7 @@ import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @AllArgsConstructor
@@ -125,7 +126,10 @@ public class ItemServiceImpl implements ItemService {
         if (Objects.equals(authorId, item.getOwner().getId())) {
             throw new AccessViolationException("Владелец не может добавлять комментарии");
         }
-        List<Long> bookingItemsIdsByUser = bookingRepository.checkApprovedBookingExist(authorId, itemId).stream()
+        LocalDateTime lt = LocalDateTime.now();
+        List<Booking> tmp = bookingRepository.checkApprovedBookingExist(authorId, itemId);
+        List<Long> bookingItemsIdsByUser = tmp.stream()
+                .filter(b -> b.getEndDate().isBefore(lt))
                 .map(Booking::getItem)
                 .map(Item::getId)
                 .toList();
