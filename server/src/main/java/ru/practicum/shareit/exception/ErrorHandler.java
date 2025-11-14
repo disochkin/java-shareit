@@ -82,6 +82,7 @@ public class ErrorHandler {
                         LocalDateTime.now()
                 ));
     }
+
     @ExceptionHandler(AccessViolationException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgumentException(AccessViolationException ex,
                                                                         HttpServletRequest request) {
